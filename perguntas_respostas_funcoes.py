@@ -30,25 +30,22 @@ def importa_dados():
     perguntas = df['Pergunta'].values.tolist()
     respostas = df['Histórico'].values.tolist()
     
-    respostas_1 = [] #respostas que não são E-SIC
-    respostas_2 = [] #respostas que são E-SIC
-    for resposta in respostas:
-        if(re.search('e-sic|E-SIC',resposta) == None):
-            respostas_1.append(resposta)
-        else:
-            respostas_2.append(resposta)
-    
     t = time.time()
-    perguntas = [trata_perguntas(pergunta) for pergunta in perguntas]
+    perguntas_out = [trata_perguntas(pergunta) for pergunta in perguntas]
     elpsd = time.time() - t
     print('Tempo para processar as perguntas: ' + str(elpsd) + '\n')
     
     t = time.time()
-    respostas = [trata_respostas_1(resposta) for resposta in respostas_1]
+    respostas_out = []
+    for resposta in respostas:
+        if(re.search('e-sic|E-SIC',resposta) == None):
+            respostas_out.append(trata_respostas_1(resposta))
+        else:
+            respostas_out.append(trata_respostas_2(resposta))
     elpsd = time.time() - t
     print('Tempo para processar as respostas: ' + str(elpsd) + '\n')
     
-    return perguntas, respostas
+    return perguntas_out, respostas_out
 
 #Coloca as perguntas no melhor formato para convertê-las para um BOW
 def trata_perguntas(texto):
@@ -134,7 +131,7 @@ def trata_respostas_1(texto):
             texto_so_resposta_final = m.group(2)
             m = re.search(secondRegex, m.group(2))
     else:
-        return ''
+        return 'resposta fora de padrao ou nao finalizada'
     
     #Retira stopwords que possam ter reaparecido e numeros romanos
     texto_so_resposta_final = texto_so_resposta_final.split()
@@ -149,6 +146,64 @@ def trata_respostas_1(texto):
     texto_limpo = re.sub(' +', ' ', texto_limpo)    
     
     return texto_limpo
+
+
+
+
+#Coloca as respostas no melhor formato para convertê-las para um BOW. Retorna os índices das respostas que não estão finalizadas
+def trata_respostas_2(texto):
+    
+    #converte todos caracteres para letra minúscula
+    texto_lower = texto.lower()
+    texto_lower = re.sub(' +', ' ', texto_lower)
+    
+    #tira sites
+    texto_sem_sites =  re.sub('(http|www)[^ ]+','',texto_lower)
+    
+    #Remove acentos e pontuação
+    texto_sem_acento_pontuacao = limpa_utf8(texto_sem_sites)
+    
+    #Remove hifens e barras
+    texto_sem_hifens_e_barras = re.sub('[-\/]', ' ', texto_sem_acento_pontuacao)
+    
+    #Troca qualquer tipo de espacamento por espaço
+    texto_sem_espacamentos = re.sub(r'\s', ' ', texto_sem_hifens_e_barras)
+    
+    #Remove dígitos
+    texto_sem_digitos = re.sub(r'\d','', texto_sem_espacamentos)
+    
+    #Remove pontuacao
+    texto_sem_pontuacao = re.sub('[^A-Za-z]', ' ' , texto_sem_digitos)
+    
+    #Remove espaços extras
+    texto_sem_espacos_extras = re.sub(' +', ' ', texto_sem_pontuacao)    
+    
+    #Pega apenas a resposta final (nem sempre o padrao eh bonitinho)
+    firstRegex = '(acesso concedido|informacao inexistente) (.+?) (responsavel|$)'
+    secondRegex = r'(' + combinacoes + ') (.+)'
+    m = re.search(firstRegex, texto_sem_espacos_extras)
+    
+    if m is not None:
+        while m is not None:
+            texto_so_resposta_final = m.group(2)
+            m = re.search(secondRegex, m.group(2))
+    else:
+        return 'resposta fora de padrao ou nao finalizada'
+    
+    #Retira stopwords que possam ter reaparecido e numeros romanos
+    texto_so_resposta_final = texto_so_resposta_final.split()
+    texto_limpo = [roman2num(palavra) for palavra in texto_so_resposta_final if palavra not in stop_words]
+    
+    texto_limpo = ' '.join(texto_limpo)
+    
+    #Remove dígitos
+    texto_limpo = re.sub(r'\d','', texto_limpo)
+    
+    #Remove espaços extras
+    texto_limpo = re.sub(' +', ' ', texto_limpo)    
+    
+    return texto_limpo
+
 
 
 # Recodificacao em utf8, removendo cedilhas acentos e coisas de latin
