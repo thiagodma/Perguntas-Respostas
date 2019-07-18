@@ -25,7 +25,7 @@ for i in range(len(respostas)):
 textos = perguntas + respostas
 
 #Faz o stemming
-#textos_stem = prf.stem(textos)
+textos_stem = prf.stem(textos)
 
 #Vetorizando e aplicando o tfidf
 vec = CountVectorizer()
@@ -35,7 +35,7 @@ base_tfidf = TfidfTransformer().fit_transform(bag_palavras)
 base_tfidf = base_tfidf.todense()
 
 #Reduzindo a dimensionalidade
-base_tfidf_reduced = prf.SVD(3000, base_tfidf)
+base_tfidf_reduced = prf.SVD(2000, base_tfidf)
 
 #Clustering
 print('Começou a clusterização.')
