@@ -6,6 +6,7 @@ import re, unicodedata, time, itertools, nltk
 from sklearn.decomposition import TruncatedSVD
 from stop_words import get_stop_words
 nltk.download('stopwords')
+nltk.download('rslp')
 #==============================================================================
 #Definindo algumas variáveis úteis
 
@@ -32,7 +33,7 @@ def define_stop_words():
 
 def importa_dados(stop_words):
     
-    print('\nComeçou a importação dos dados.\n')
+    print('\nComeçou a importação dos dados.')
     
     #primeiramente importa os dados de forma bruta
     df = pd.read_excel('GGALI__ago2018_a_mai2019.xlsx', sheet_name='Protocolos')
@@ -43,7 +44,7 @@ def importa_dados(stop_words):
     t = time.time()
     perguntas_out = [trata_perguntas(pergunta, stop_words) for pergunta in perguntas]
     elpsd = time.time() - t
-    print('Tempo para processar as perguntas: ' + str(elpsd) + '\n')
+    print('Tempo para processar as perguntas: ' + str(elpsd))
     
     t = time.time()
     respostas_out = []
@@ -85,10 +86,12 @@ def trata_perguntas(texto, stop_words):
     texto_sem_pontuacao_digitos = re.sub('[^A-Za-z]', ' ' , texto_sem_espacamentos)
     
     #Tïra o cabeçalho das perguntas
-    texto_sem_cabecalho = re.sub(r'empresa.*cnpj','' , texto_sem_pontuacao_digitos)
+    m = re.search(r'(cnpj)?(.*)', texto_sem_pontuacao_digitos)
+    texto_sem_cabecalho = m.group(2)
     
     #Tira despedida
-    texto_sem_despedida = re.sub(r'(obrigad|atenciosamente|desde ja).*', '', texto_sem_cabecalho)
+    m = re.search(r'(.*?)(obrigad|atenciosamente|desde ja|att|$)', texto_sem_cabecalho)
+    texto_sem_despedida = m.group(1)
     
     #Retira stopwords que possam ter reaparecido e numeros romanos
     texto_sem_despedida = texto_sem_despedida.split()
@@ -102,7 +105,10 @@ def trata_perguntas(texto, stop_words):
     #Remove espaços extras
     texto_limpo = re.sub(' +', ' ', texto_limpo)    
     
-    return texto_limpo
+    if texto_limpo == '':
+        return 'pergunta ou resposta fora de padrao ou nao finalizada'
+    else:
+        return texto_limpo
 
 #Coloca as respostas no melhor formato para convertê-las para um BOW. Retorna os índices das respostas que não estão finalizadas
 def trata_respostas_1(texto,stop_words):
@@ -146,7 +152,7 @@ def trata_respostas_1(texto,stop_words):
             texto_so_resposta_final = m.group(2)
             m = re.search(secondRegex, m.group(2))
     else:
-        return 'resposta fora de padrao ou nao finalizada'
+        return 'pergunta ou resposta fora de padrao ou nao finalizada'
     
     #Retira stopwords que possam ter reaparecido e numeros romanos
     texto_so_resposta_final = texto_so_resposta_final.split()
@@ -208,7 +214,7 @@ def trata_respostas_2(texto, stop_words):
             texto_so_resposta_final = m.group(2)
             m = re.search(secondRegex, m.group(2))
     else:
-        return 'resposta fora de padrao ou nao finalizada'
+        return 'pergunta ou resposta fora de padrao ou nao finalizada'
     
     #Retira stopwords que possam ter reaparecido e numeros romanos
     texto_so_resposta_final = texto_so_resposta_final.split()
@@ -273,10 +279,14 @@ def roman2num(roman, stop_words, values={'m': 1000, 'd': 500, 'c': 100, 'l': 50,
 
 #Reduz a dimensionalidade dos dados
 def SVD(dim,base_tfidf):
+    print('Começou a redução de dimensionalidade.')
+    t = time.time()
     svd = TruncatedSVD(n_components = dim, random_state = 42)
     base_tfidf_reduced = svd.fit_transform(base_tfidf)
-    print('\nNúmero de dimensoes de entrada: ' + str(base_tfidf.shape[1]))
-    print(str(dim) + ' dimensões explicam ' + str(svd.explained_variance_ratio_.sum()) + ' da variância.\n' )
+    print('Número de dimensoes de entrada: ' + str(base_tfidf.shape[1]))
+    print(str(dim) + ' dimensões explicam ' + str(svd.explained_variance_ratio_.sum()) + ' da variância.')
+    elpsd = time.time() - t
+    print('Tempo para fazer a redução de dimensionalidade: ' + str(elpsd) + '\n')
     return base_tfidf_reduced
                 
 
@@ -303,21 +313,25 @@ def analisa_clusters(base_tfidf, id_clusters):
         y = Y[idxs[0]]
         plt.scatter(x, y, color=color)
     
-    return n_normas 
+    return n_normas
+
+#Faz os stemming nas palavras utilizando o pacote NLTK com o RSLP Portuguese stemmer
+def stem(resolucoes):
     
+    print('Comecou a fazer o stemming.')
+    t = time.time()
+    #Inicializo a lista que será o retorno da funcao
+    res = []
+    
+    #inicializando o objeto stemmer
+    stemmer = nltk.stem.RSLPStemmer()
+    
+    for resolucao in resolucoes:
+        #Faz o stemming para cada palavra na resolucao
+        palavras_stemmed_resolucao = [stemmer.stem(word) for word in resolucao.split()]
+        #Faz o append da resolucao que passou pelo stemming
+        res.append(" ".join(palavras_stemmed_resolucao))
+    
+    print('Tempo para fazer o stemming: ' + str(time.time() - t) + '\n')
         
-        
-        
-        
-        
-
-
-
-
-
-
-
-
-
-
-
+    return res
