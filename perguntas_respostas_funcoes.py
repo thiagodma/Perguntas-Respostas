@@ -150,7 +150,7 @@ def trata_respostas_1(texto):
 
 
 
-#Coloca as respostas no melhor formato para convertê-las para um BOW. Retorna os índices das respostas que não estão finalizadas
+#Coloca as respostas no melhor formato para convertê-las para um BOW. Essa função é específica para as perguntas com E-SIC
 def trata_respostas_2(texto):
     
     #converte todos caracteres para letra minúscula
