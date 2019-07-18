@@ -24,6 +24,9 @@ for i in range(len(respostas)):
 #Concatena as duas listas
 textos = perguntas + respostas
 
+#Faz o stemming
+#textos_stem = prf.stem(textos)
+
 #Vetorizando e aplicando o tfidf
 vec = CountVectorizer()
 bag_palavras = vec.fit_transform(textos)
@@ -31,10 +34,13 @@ feature_names = vec.get_feature_names()
 base_tfidf = TfidfTransformer().fit_transform(bag_palavras)
 base_tfidf = base_tfidf.todense()
 
+#Reduzindo a dimensionalidade
+base_tfidf_reduced = prf.SVD(3000, base_tfidf)
+
 #Clustering
-print('Começou a clusterização.\n')
+print('Começou a clusterização.')
 t = time.time()
-clusters_por_cosseno = hierarchy.linkage(base_tfidf,"average", metric="cosine") #pode testar metric="euclidean" também
+clusters_por_cosseno = hierarchy.linkage(base_tfidf_reduced,"average", metric="cosine") #pode testar metric="euclidean" também
 plt.figure()
 dn = hierarchy.dendrogram(clusters_por_cosseno)
 elpsd = time.time() - t
@@ -42,7 +48,7 @@ print('Tempo para fazer a clusterização: ' + str(elpsd) + '\n')
 
 # Separa a que Cluster pertence cada texto, pela ordem na lista de textos,
 # dado o parâmetro de limite de dissimilaridade threshold
-limite_dissimilaridade = 0.85
+limite_dissimilaridade = 0.95
 id_clusters = hierarchy.fcluster(clusters_por_cosseno, limite_dissimilaridade, criterion="distance")
 
 #Tentando visualizar os dados e vendo o número de amostras por cluster
