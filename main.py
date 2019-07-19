@@ -9,20 +9,20 @@ from scipy.cluster import hierarchy
 stop_words = prf.define_stop_words()
 
 #Importa os dados e os retorna já tratados
-perguntas, respostas = prf.importa_dados(stop_words)
+perguntasx, respostasx, perguntas, respostas = prf.importa_dados(stop_words)
 
 #Define como saber qual pergunta corresponde a qual resposta quando olhando o csv
 perguntas_respostas_id = []
 
-for i in range(len(perguntas)):
+for i in range(len(perguntasx)):
     perguntas_respostas_id.append('P' + str(i))
 
-for i in range(len(respostas)):
+for i in range(len(respostasx)):
     perguntas_respostas_id.append('R' + str(i))
 
 
 #Concatena as duas listas
-textos = perguntas + respostas
+textos = perguntasx
 
 #Faz o stemming
 textos_stem = prf.stem(textos)
@@ -41,8 +41,8 @@ base_tfidf_reduced = prf.SVD(2000, base_tfidf)
 print('Começou a clusterização.')
 t = time.time()
 clusters_por_cosseno = hierarchy.linkage(base_tfidf_reduced,"average", metric="cosine") #pode testar metric="euclidean" também
-plt.figure()
-dn = hierarchy.dendrogram(clusters_por_cosseno)
+#plt.figure()
+#dn = hierarchy.dendrogram(clusters_por_cosseno)
 elpsd = time.time() - t
 print('Tempo para fazer a clusterização: ' + str(elpsd) + '\n')
 
