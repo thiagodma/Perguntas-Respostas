@@ -41,8 +41,8 @@ base_tfidf_reduced = prf.SVD(3000, base_tfidf)
 print('Começou a clusterização.')
 t = time.time()
 clusters_por_cosseno = hierarchy.linkage(base_tfidf_reduced,"average", metric="cosine") #pode testar metric="euclidean" também
-plt.figure()
-dn = hierarchy.dendrogram(clusters_por_cosseno)
+#plt.figure()
+#dn = hierarchy.dendrogram(clusters_por_cosseno)
 elpsd = time.time() - t
 print('Tempo para fazer a clusterização: ' + str(elpsd) + '\n')
 
