@@ -85,13 +85,19 @@ def trata_perguntas(texto, stop_words):
     #Remove pontuacao e digitos
     texto_sem_pontuacao_digitos = re.sub('[^A-Za-z]', ' ' , texto_sem_espacamentos)
     
+    #Tira o cabecalho das perguntas "Dados do remetente"
+    m = re.search(r'(.*descricao\s+procedimento)?(.*)', texto_sem_pontuacao_digitos)
+    texto_sem_cabecalho_dados_remetente = m.group(2)
+    
+    
     #Tira o cabeçalho das perguntas com E-SIC
-    m = re.search(r'(sistema\s+e\s+sic.*estabelecido\s+cgu)?(.*)', texto_sem_pontuacao_digitos)
+    m = re.search(r'(sistema\s+e\s+sic.*estabelecido\s+cgu)?(.*)', texto_sem_cabecalho_dados_remetente)
     texto_sem_cabecalho_esic = m.group(2)
     
-    #Tïra o cabeçalho das perguntas sem E-SIC
-    m = re.search(r'(.*cnpj)?(.*)', texto_sem_cabecalho_esic)
-    texto_sem_cabecalho = m.group(2)
+    #Tïra o cabeçalho bizarro
+    m = re.search(r'((.*?)cnpj)?(.*)(razao\s+social.*)?', texto_sem_cabecalho_esic)
+    texto_sem_cabecalho = m.group(3)
+    
     
     #Tira despedida
     m = re.search(r'(.*?)(obrigad|atenciosamente|desde\s+agradeco|att|$)', texto_sem_cabecalho)
