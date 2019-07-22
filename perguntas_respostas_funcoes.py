@@ -354,7 +354,7 @@ def mostra_conteudo_clusters(cluster,n_amostras,perguntas,respostas):
     df = pd.read_csv('cluster_perguntas_respostas_cosseno.csv', sep='|')
     a = df[df['cluster_id'] == cluster]
     
-    if a.shape[0] >= n_amostras: mostra = a.sample(n_amostras)
+    if a.shape[0] >= n_amostras: mostra = a.sample(n_amostras,random_state = 42)
     else : mostra = a
     
     fo = open(r'conteudo_cluster'+str(cluster)+'_n_'+str(a.shape[0])+'.txt', 'w+')
