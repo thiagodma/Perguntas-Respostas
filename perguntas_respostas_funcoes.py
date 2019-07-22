@@ -4,6 +4,7 @@ import matplotlib.cm as cm
 import matplotlib.pyplot as plt
 import re, unicodedata, time, itertools, nltk
 from sklearn.decomposition import TruncatedSVD
+from sklearn.feature_extraction.text import CountVectorizer, TfidfTransformer
 from stop_words import get_stop_words
 nltk.download('stopwords')
 nltk.download('rslp')
@@ -22,8 +23,9 @@ def define_stop_words():
     
     stop_words = get_stop_words('portuguese')
     stop_words = stop_words + nltk.corpus.stopwords.words('portuguese')
-    stop_words = stop_words + ['art','dou','secao','pag','pagina', 'in', 'inc', 'obs', 'sob', 'cnpj', 'ltda']
+    stop_words = stop_words + ['art','dou','secao','pag','pagina', 'in', 'inc', 'obs', 'sob', 'ltda']
     stop_words = stop_words + ['ndash', 'mdash', 'lsquo','rsquo','ldquo','rdquo','bull','hellip','prime','lsaquo','rsaquo','frasl', 'ordm']
+    stop_words = stop_words + ['prezado', 'prezados', 'prezada', 'prezadas', 'gereg', 'ggali','usuario', 'usuaria', 'deseja','gostaria', 'boa tarde', 'bom dia', 'boa noite']
     stop_words = list(dict.fromkeys(stop_words))
     stop_words = ' '.join(stop_words)
     #As stop_words vem com acentos/cedilhas. Aqui eu tiro os caracteres indesejados
@@ -93,17 +95,18 @@ def trata_perguntas(texto, stop_words):
     #Tira o cabeçalho das perguntas com E-SIC
     m = re.search(r'(sistema\s+e\s+sic.*estabelecido\s+cgu)?(.*)', texto_sem_cabecalho_dados_remetente)
     texto_sem_cabecalho_esic = m.group(2)
+    texto_sem_cabecalho = texto_sem_cabecalho_esic
     
-    #Tïra o cabeçalho bizarro
-    m = re.search(r'((.*?)cnpj)?(.*)(razao\s+social.*)?', texto_sem_cabecalho_esic)
-    texto_sem_cabecalho = m.group(3)
+    #Tira o cabecalho Empresa: CNPJ:
+    m = re.search(r'(^\s*empresa.*cnpj?)?(.*)', texto_sem_cabecalho_esic)
+    texto_sem_cabecalho = m.group(2)
     
-    
-    #Tira despedida
-    m = re.search(r'(.*?)(obrigad|atenciosamente|desde\s+agradeco|att|$)', texto_sem_cabecalho)
+    #Tira despedida/finalização da pergunta
+    m = re.search(r'(.*?)(obrigad|atenciosamente|desde\s+agradeco|att|dados\s*empresa.*cnpj|razao\s*social|grata|grato|$)', texto_sem_cabecalho)
     texto_sem_despedida = m.group(1)
     
     #Retira stopwords que possam ter reaparecido e numeros romanos
+    stop_words = stop_words + ' cnpj'
     texto_sem_despedida = texto_sem_despedida.split()
     texto_limpo = [roman2num(palavra, stop_words) for palavra in texto_sem_despedida]
     
@@ -354,7 +357,7 @@ def mostra_conteudo_clusters(cluster,n_amostras,perguntas,respostas):
     if a.shape[0] >= n_amostras: mostra = a.sample(n_amostras)
     else : mostra = a
     
-    fo = open(r'conteudo_cluster.txt', 'w+')
+    fo = open(r'conteudo_cluster'+str(cluster)+'_n_'+str(a.shape[0])+'.txt', 'w+')
     
     for i in range(mostra.shape[0]):
         if mostra.iloc[i,1][0] == 'P':
@@ -367,4 +370,47 @@ def mostra_conteudo_clusters(cluster,n_amostras,perguntas,respostas):
             fo.write('\n\n')
             
     fo.close()
-
+    
+def mostra_palavras_relevantes(cluster, perguntasx, n_palavras):
+    df = pd.read_csv('cluster_perguntas_respostas_cosseno.csv', sep='|')
+    a = df[df['cluster_id'] == cluster]
+    
+    textos=[]
+    for i in range(a.shape[0]):
+        textos.append(perguntasx[int(a.iloc[i,1][1:])])
+    
+    vec = CountVectorizer()
+    bag_palavras = vec.fit_transform(textos)
+    #base_tfidf = TfidfTransformer().fit_transform(bag_palavras).todense()
+    feature_names = vec.get_feature_names()
+    
+    bag_palavras[bag_palavras>1] = 1
+    base_tfidf = bag_palavras
+    
+    count = base_tfidf.sum(axis=0)
+    
+    for i in range(n_palavras):
+       idx = count.argmax()
+       print(feature_names[idx], count[0,idx])
+       count[0,idx] = -1
+    
+        
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
