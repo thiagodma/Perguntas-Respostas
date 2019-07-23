@@ -6,8 +6,8 @@ import re, unicodedata, time, itertools, nltk
 from sklearn.decomposition import TruncatedSVD
 from sklearn.feature_extraction.text import CountVectorizer, TfidfTransformer
 from stop_words import get_stop_words
-nltk.download('stopwords')
-nltk.download('rslp')
+#nltk.download('stopwords')
+#nltk.download('rslp')
 #==============================================================================
 #Definindo algumas variáveis úteis
 
@@ -351,7 +351,7 @@ def stem(resolucoes):
 
 
 def mostra_conteudo_clusters(cluster,n_amostras,perguntas,respostas):
-    df = pd.read_csv('cluster_perguntas_respostas_cosseno.csv', sep='|')
+    df = pd.read_csv('texto_perguntas_por_cluster.csv', sep='|')
     a = df[df['cluster_id'] == cluster]
     
     if a.shape[0] >= n_amostras: mostra = a.sample(n_amostras,random_state = 42)
@@ -372,45 +372,66 @@ def mostra_conteudo_clusters(cluster,n_amostras,perguntas,respostas):
     fo.close()
     
 def mostra_palavras_relevantes(cluster, perguntasx, n_palavras):
-    df = pd.read_csv('cluster_perguntas_respostas_cosseno.csv', sep='|')
+    
+    #importa o csv que tem a informação das clusters
+    df = pd.read_csv('texto_perguntas_por_cluster.csv', sep='|')
     a = df[df['cluster_id'] == cluster]
     
+    #importa as perguntas pertencentes à cluster
     textos=[]
     for i in range(a.shape[0]):
         textos.append(perguntasx[int(a.iloc[i,1][1:])])
     
+    #vetoriza para contar facilmente quantas vezes cada palavra aparece
     vec = CountVectorizer()
     bag_palavras = vec.fit_transform(textos)
-    #base_tfidf = TfidfTransformer().fit_transform(bag_palavras).todense()
     feature_names = vec.get_feature_names()
     
+    #Se apareceu apenas uma vez em uma pergunta já e suficiente
     bag_palavras[bag_palavras>1] = 1
-    base_tfidf = bag_palavras
     
-    count = base_tfidf.sum(axis=0)
+    #Computa o número de vezes que cada palavra apareceu
+    count = bag_palavras.sum(axis=0)
     
+    #inicializa a variável de retorno
+    palavras_relevantes=[]
+    
+    #Coloca na variável de saída as palavras mais relevantes com a respectiva contagem
     for i in range(n_palavras):
        idx = count.argmax()
-       print(feature_names[idx], count[0,idx])
+       palavras_relevantes.append(feature_names[idx] + '-' + str(count[0,idx]))
        count[0,idx] = -1
     
+    return ' '.join(palavras_relevantes)
+    
+
+def generate_csvs_for_powerbi(analise, Z, perguntas, perguntasx):
+    
+    clusters = [i for i in range(1,len(analise)+1)]
+    
+    #Prepara a tabela que indica o número de perguntas por cluster
+    d={'cluster_id':clusters,'numero_de_perguntas':analise}
+    df = pd.DataFrame(d)
+    #exporta a tabela para um csv
+    df.to_csv('info_cluster.csv',sep='|',index=False,encoding='utf-8')
+    
+    #adiciona as keywords de cada cluster no csv
+    palavras_relevantes = [mostra_palavras_relevantes(cluster,perguntasx,10) for cluster in clusters]
+    df['Keywords'] = 'default'
+    for i in range(len(clusters)):
+        df.iloc[i,2] = palavras_relevantes[i]
+    df.to_csv('info_cluster.csv',sep='|',index=False,encoding='utf-8')
+    
+    #Prepara a tabela que tem a pergunta, o indentificador da pergunta
+    #e a qual cluster a pergunta pertence
+    Z['pergunta_sem_processamento'] = 'default'
+    Z['pergunta_com_processamento'] = 'default'
+    for i in range(Z.shape[0]):
+        idx = int(Z.iloc[i,1][1:])
+        #Adiciona a pergunta sem processamento na coluna correspondente
+        Z.iloc[i,2] = perguntas[idx]
+        #Adiciona a pergunta com processamento na coluna correspondente
+        Z.iloc[i,3] = perguntasx[idx]
         
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
+    Z.to_csv('texto_perguntas_por_cluster.csv',sep='|',index=False,encoding='utf-8')
     
