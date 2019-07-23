@@ -56,11 +56,10 @@ analise = prf.analisa_clusters(base_tfidf, id_clusters)
 
 #Colocando em dataframes
 X = pd.DataFrame(id_clusters,columns=['cluster_id'])
-Y = pd.DataFrame(perguntas_respostas_id ,columns=['perguntas_respostas'])
+Y = pd.DataFrame(perguntas_respostas_id ,columns=['pergunta_id'])
 Z = X.join(Y)
 
 print('Foram encontradas ' + str(max(Z['cluster_id'])) + ' clusters\n')
 
 #Exporta as tabelas
-Z.to_csv('cluster_perguntas_respostas_cosseno.csv', sep='|', 
-                    index=False, encoding='utf-8')
+prf.generate_csvs_for_powerbi(analise,Z,perguntas,perguntasx)
