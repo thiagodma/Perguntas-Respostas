@@ -98,15 +98,16 @@ def trata_perguntas(texto, stop_words):
     texto_sem_cabecalho = texto_sem_cabecalho_esic
     
     #Tira o cabecalho Empresa: CNPJ:
-    m = re.search(r'(^\s*empresa.*cnpj?)?(.*)', texto_sem_cabecalho_esic)
+    m = re.search(r'(^\s*empresa.*?cnpj)?(.*)', texto_sem_cabecalho_esic)
     texto_sem_cabecalho = m.group(2)
     
     #Tira despedida/finalização da pergunta
-    m = re.search(r'(.*?)(obrigad|atenciosamente|desde\s+agradeco|att|dados\s*empresa.*cnpj|razao\s*social|grata|grato|$)', texto_sem_cabecalho)
+    m = re.search(r'(.*?)(cordialmente|obrigad|atenciosamente|desde\s+agradeco|att|dados\s*empresa.*cnpj|razao\s*social|grata|grato|$)', texto_sem_cabecalho)
+    #m = re.search(r'(.*?)(cordialmente|obrigad|atenciosamente|desde\s+agradeco|att|dados\s*empresa.*cnpj|grata|grato|$)', texto_sem_cabecalho)
     texto_sem_despedida = m.group(1)
     
     #Retira stopwords que possam ter reaparecido e numeros romanos
-    stop_words = stop_words + ' cnpj'
+    #stop_words = stop_words + ' cnpj'
     texto_sem_despedida = texto_sem_despedida.split()
     texto_limpo = [roman2num(palavra, stop_words) for palavra in texto_sem_despedida]
     
@@ -118,7 +119,7 @@ def trata_perguntas(texto, stop_words):
     #Remove espaços extras
     texto_limpo = re.sub(' +', ' ', texto_limpo)    
     
-    if texto_limpo == '':
+    if len(texto_limpo) <= 29:
         return 'pergunta ou resposta fora de padrao ou nao finalizada'
     else:
         return texto_limpo
