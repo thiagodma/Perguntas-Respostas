@@ -6,6 +6,7 @@ import re, unicodedata, time, itertools, nltk
 from sklearn.decomposition import TruncatedSVD
 from sklearn.feature_extraction.text import CountVectorizer, TfidfTransformer
 from stop_words import get_stop_words
+from wordcloud import WordCloud
 #nltk.download('stopwords')
 #nltk.download('rslp')
 #==============================================================================
@@ -372,6 +373,25 @@ def mostra_conteudo_clusters(cluster,n_amostras,perguntas,respostas):
             
     fo.close()
     
+def generate_wordcloud(cluster, stop_words):
+    '''
+    Gera uma nuvem de palavras de uma cluster 'cluster'.
+    '''
+    
+    #importa o csv que tem a informação das clusters
+    df = pd.read_csv('texto_perguntas_por_cluster.csv', sep='|')
+    a = df[df['cluster_id'] == cluster]
+    
+    L = list(a.iloc[:,3])
+    text = '\n'.join(L)
+    
+    
+    wordcloud = WordCloud(stopwords=stop_words.split()+['laboratorio','laboratorios','rdc']).generate(text)
+    plt.imshow(wordcloud, interpolation='bilinear')
+    plt.axis("off")
+    plt.show()
+    
+    
 def mostra_palavras_relevantes(cluster, perguntasx, n_palavras):
     
     #importa o csv que tem a informação das clusters
@@ -404,7 +424,7 @@ def mostra_palavras_relevantes(cluster, perguntasx, n_palavras):
        count[0,idx] = -1
     
     return ' '.join(palavras_relevantes)
-    
+
 
 def generate_csvs_for_powerbi(analise, Z, perguntas, perguntasx):
     
