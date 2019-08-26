@@ -4,11 +4,12 @@ respostas = Respostas()
 
 stopwords = ['prezado', 'prezados', 'prezada', 'prezadas', 'gereg', 'ggali',
              'usuario', 'usuaria', 'deseja','gostaria', 'boa tarde', 'bom dia',
-             'boa noite']
+             'boa noite', 'rdc', 'ins']
 
 respostas.define_stop_words(user_defined_stopwords=stopwords)
 
 respostas.importa_textos()
+import pdb; pdb.set_trace()
 
 #vetoriza e aplica o tfidf
 base_tfidf = respostas.vec_tfidf()
@@ -23,6 +24,7 @@ t = time.time()
 clusters_por_cosseno = hierarchy.linkage(base_tfidf_reduced,"average", metric="cosine") #pode testar metric="euclidean" também
 plt.figure()
 dn = hierarchy.dendrogram(clusters_por_cosseno)
+plt.savefig('dendrogram.png')
 elpsd = time.time() - t
 print('Tempo para fazer a clusterização: ' + str(elpsd) + '\n')
 
