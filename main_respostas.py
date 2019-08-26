@@ -1,9 +1,12 @@
 from perguntas_respostas import *
-import pandas as pd
 
 respostas = Respostas()
 
-respostas.define_stopwords()
+stopwords = ['prezado', 'prezados', 'prezada', 'prezadas', 'gereg', 'ggali',
+             'usuario', 'usuaria', 'deseja','gostaria', 'boa tarde', 'bom dia',
+             'boa noite']
+
+respostas.define_stop_words(user_defined_stopwords=stopwords)
 
 respostas.importa_textos()
 
