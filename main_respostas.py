@@ -4,12 +4,12 @@ respostas = Respostas()
 
 stopwords = ['prezado', 'prezados', 'prezada', 'prezadas', 'gereg', 'ggali',
              'usuario', 'usuaria', 'deseja','gostaria', 'boa tarde', 'bom dia',
-             'boa noite', 'rdc', 'ins']
+             'boa noite', 'rdc', 'ins', 'geare', 'resposta', 'link']
 
 respostas.define_stop_words(user_defined_stopwords=stopwords)
 
 respostas.importa_textos()
-
+import pdb; pdb.set_trace()
 #vetoriza e aplica o tfidf
 base_tfidf = respostas.vec_tfidf()
 
