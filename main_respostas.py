@@ -9,7 +9,6 @@ stopwords = ['prezado', 'prezados', 'prezada', 'prezadas', 'gereg', 'ggali',
 respostas.define_stop_words(user_defined_stopwords=stopwords)
 
 respostas.importa_textos()
-import pdb; pdb.set_trace()
 
 #vetoriza e aplica o tfidf
 base_tfidf = respostas.vec_tfidf()
