@@ -128,10 +128,15 @@ class Respostas(ClassicClustering):
                 if m==None: break
                 texto_sem_cabecalho = m.group(2)
         else:
-            #retira todo o lixo antes de começar a resposta (e-sic)
-            m = re.search(r'(acesso\s+concedido)(.*)',texto_lower)
-            if m==None: return 'não há resposta para essa pergunta'
-            texto_sem_cabecalho = m.group(2)
+            count = 0
+            texto_sem_cabecalho = texto_lower
+            while True:
+                #retira todo o lixo antes de começar a resposta (e-sic)
+                m = re.search(r'(acesso\s+concedido)(.*)',texto_sem_cabecalho)
+                if (m==None) and (count==0): return 'não há resposta para essa pergunta'
+                if m==None: break
+                texto_sem_cabecalho = m.group(2)
+                count = count+1
 
         #tira a saudacao (all)
         texto_sem_saudacao = re.sub(r'prezado\s+\(a\)\s+senhor\s+\(a\),.*?,','',texto_sem_cabecalho)
