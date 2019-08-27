@@ -177,5 +177,5 @@ class Respostas(ClassicClustering):
         lista_textos_por_cluster_respostas = list(zip(self.textos_id, id_clusters, self.textos, self.textos_tratados))
         #cria o arquivo textos_por_cluster_perguntas.csv
         textos_por_cluster_respostas = pd.DataFrame(lista_textos_por_cluster_respostas,
-                                       columns=['textos_id','cluster_id','texto','texto_tratado'])
+                                       columns=['textos_id','cluster_id','textos','textos_tratados'])
         textos_por_cluster_respostas.to_csv('textos_por_cluster_respostas.csv', sep='|', index=False, encoding='utf-8')
