@@ -89,7 +89,7 @@ class Perguntas(ClassicClustering):
         lista_textos_por_cluster_perguntas = list(zip(self.textos_id, id_clusters, self.textos, self.textos_tratados))
         #cria o arquivo textos_por_cluster_perguntas.csv
         textos_por_cluster_perguntas = pd.DataFrame(lista_textos_por_cluster_perguntas,
-                                       columns=['textos_id','cluster_id','texto','texto_tratado'])
+                                       columns=['textos_id','cluster_id','textos','textos_tratados'])
         textos_por_cluster_perguntas.to_csv('textos_por_cluster_perguntas.csv', sep='|', index=False, encoding='utf-8')
 
 class Respostas(ClassicClustering):
