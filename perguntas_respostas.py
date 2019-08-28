@@ -172,7 +172,7 @@ class Respostas(ClassicClustering):
         texto_sem_stopwords = ' '.join(texto_sem_stopwords)
 
         texto_limpo = re.sub(' +', ' ', texto_sem_stopwords)
-        if texto_limpo == '': import pdb; pdb.set_trace()
+
         return texto_limpo
 
     def generate_csvs(self, info_cluster, id_clusters):
