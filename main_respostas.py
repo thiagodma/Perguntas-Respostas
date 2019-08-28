@@ -21,7 +21,7 @@ base_tfidf = respostas.vec_tfidf()
 #reduzindo a dimensionalidade
 dim = 2000
 base_tfidf_reduced = respostas.SVD(base_tfidf,dim=dim)
-import pdb; pdb.set_trace()
+
 #Clustering
 print('Começou a clusterização.')
 t = time.time()
