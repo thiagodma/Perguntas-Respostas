@@ -1,4 +1,4 @@
-from perguntas_respostas_funcoes import *
+from perguntas_respostas import *
 
 #cria um objeto da classe Perguntas
 perguntas = Perguntas()
