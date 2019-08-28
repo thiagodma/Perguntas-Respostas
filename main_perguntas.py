@@ -15,10 +15,10 @@ perguntas.define_stop_words(user_defined_stopwords=stopwords)
 perguntas.importa_textos()
 
 #faz o stemming nas perguntas
-perguntas.stem()
+#perguntas.stem()
 
 #vetoriza e aplica o tfidf
-base_tfidf = perguntas.vec_tfidf()
+base_tfidf = perguntas.vec_tfidf(stem=False)
 
 #reduzindo a dimensionalidade
 dim = 2000

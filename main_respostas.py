@@ -4,7 +4,11 @@ respostas = Respostas()
 
 stopwords = ['prezado', 'prezados', 'prezada', 'prezadas', 'gereg', 'ggali',
              'usuario', 'usuaria', 'deseja','gostaria', 'boa tarde', 'bom dia',
-             'boa noite', 'rdc', 'ins', 'geare', 'resposta', 'link']
+             'boa noite', 'rdc', 'ins', 'geare', 'resposta', 'link','portaria',
+             'anvisa','informamos','perguntas','respostas','intrucao','normativa',
+             'portanto','decreto','lei','esclarecemos','produto','resolucao',
+             'dispoe','sobre','idr','cada','vigilancia','sanitaria','sanitarias',
+             ]
 
 #inicializa o atributo de stopwords
 respostas.define_stop_words(user_defined_stopwords=stopwords)
@@ -13,10 +17,10 @@ respostas.define_stop_words(user_defined_stopwords=stopwords)
 respostas.importa_textos()
 
 #faz o stemming nos textos
-respostas.stem()
+#respostas.stem()
 
 #vetoriza e aplica o tfidf
-base_tfidf = respostas.vec_tfidf()
+base_tfidf = respostas.vec_tfidf(stem=False)
 
 #reduzindo a dimensionalidade
 dim = 2000
