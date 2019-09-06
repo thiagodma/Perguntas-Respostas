@@ -25,7 +25,7 @@ for i in range(len(respostasx)):
 textos = perguntasx
 
 #Faz o stemming
-textos_stem = prf.stem(textos)
+#textos_stem = prf.stem(textos)
 
 #Vetorizando e aplicando o tfidf
 vec = CountVectorizer()
@@ -62,4 +62,4 @@ Z = X.join(Y)
 print('Foram encontradas ' + str(max(Z['cluster_id'])) + ' clusters\n')
 
 #Exporta as tabelas
-prf.generate_csvs_for_powerbi(analise,Z,perguntas,respostasx)
+prf.generate_csvs_for_powerbi(analise,Z,perguntas,perguntasx,respostasx)

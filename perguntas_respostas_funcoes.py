@@ -146,7 +146,7 @@ def trata_respostas(texto,stop_words):
             if (m==None) and (count==0): return 'não há resposta para essa pergunta'
             if m==None: break
             texto_sem_cabecalho = m.group(2)
-            count = count+1    
+            count = count+1
 
     return texto_sem_cabecalho
 
@@ -393,7 +393,7 @@ def mostra_palavras_relevantes(cluster, perguntasx, n_palavras):
     return ' '.join(palavras_relevantes)
 
 
-def generate_csvs_for_powerbi(analise, Z, perguntas, perguntasx):
+def generate_csvs_for_powerbi(analise, Z, perguntas, perguntasx, respostasx):
 
     clusters = [i for i in range(1,len(analise)+1)]
 
@@ -403,22 +403,19 @@ def generate_csvs_for_powerbi(analise, Z, perguntas, perguntasx):
     #exporta a tabela para um csv
     df.to_csv('info_cluster.csv',sep='|',index=False,encoding='utf-8')
 
-    #adiciona as keywords de cada cluster no csv
-    palavras_relevantes = [mostra_palavras_relevantes(cluster,perguntasx,10) for cluster in clusters]
-    df['Keywords'] = 'default'
-    for i in range(len(clusters)):
-        df.iloc[i,2] = palavras_relevantes[i]
-    df.to_csv('info_cluster.csv',sep='|',index=False,encoding='utf-8')
 
     #Prepara a tabela que tem a pergunta, o indentificador da pergunta
     #e a qual cluster a pergunta pertence
     Z['pergunta_sem_processamento'] = 'default'
     Z['pergunta_com_processamento'] = 'default'
+    Z['resposta'] = 'default'
     for i in range(Z.shape[0]):
         idx = int(Z.iloc[i,1][1:])
         #Adiciona a pergunta sem processamento na coluna correspondente
         Z.iloc[i,2] = perguntas[idx]
         #Adiciona a pergunta com processamento na coluna correspondente
         Z.iloc[i,3] = perguntasx[idx]
+        #Adiciona a resposta na coluna correspondente
+        Z.iloc[i,4] = respostasx[idx]
 
     Z.to_csv('texto_perguntas_por_cluster.csv',sep='|',index=False,encoding='utf-8')
