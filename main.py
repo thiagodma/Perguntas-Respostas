@@ -62,4 +62,4 @@ Z = X.join(Y)
 print('Foram encontradas ' + str(max(Z['cluster_id'])) + ' clusters\n')
 
 #Exporta as tabelas
-prf.generate_csvs_for_powerbi(analise,Z,perguntas,perguntasx)
+prf.generate_csvs_for_powerbi(analise,Z,perguntas,respostas)
