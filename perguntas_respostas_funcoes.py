@@ -51,11 +51,7 @@ def importa_dados(stop_words):
 
     t = time.time()
     respostas_out = []
-    for resposta in respostas:
-        if(re.search('e-sic|E-SIC',resposta) == None):
-            respostas_out.append(trata_respostas_1(resposta,stop_words))
-        else:
-            respostas_out.append(trata_respostas_2(resposta, stop_words))
+    respostas_out = [trata_respostas(resposta, stop_words) for resposta in respostas]
     elpsd = time.time() - t
     print('Tempo para processar as respostas: ' + str(elpsd) + '\n')
 
@@ -126,62 +122,33 @@ def trata_perguntas(texto, stop_words):
         return texto_limpo
 
 #Coloca as respostas no melhor formato para convertê-las para um BOW. Retorna os índices das respostas que não estão finalizadas
-def trata_respostas_1(texto,stop_words):
+def trata_respostas(texto,stop_words):
 
     #converte todos caracteres para letra minúscula
     texto_lower = texto.lower()
     texto_lower = re.sub(' +', ' ', texto_lower)
 
-    #tira sites
-    texto_sem_sites =  re.sub('(http|www)[^ ]+','',texto_lower)
+    isEsic = re.search('e-sic',texto_lower) != None
 
-    #Remove acentos e pontuação
-    texto_sem_acento_pontuacao = limpa_utf8(texto_sem_sites)
-
-    #Retira numeros romanos e stopwords
-    texto_sem_acento_pontuacao = texto_sem_acento_pontuacao.split()
-    texto_sem_stopwords = [roman2num(palavra, stop_words) for palavra in texto_sem_acento_pontuacao]
-    texto_sem_stopwords = ' '.join(texto_sem_stopwords)
-
-    #Remove hifens e barras
-    texto_sem_hifens_e_barras = re.sub('[-\/]', ' ', texto_sem_stopwords)
-
-    #Troca qualquer tipo de espacamento por espaço
-    texto_sem_espacamentos = re.sub(r'\s', ' ', texto_sem_hifens_e_barras)
-
-    #Remove dígitos
-    texto_sem_digitos = re.sub(r'\d','', texto_sem_espacamentos)
-
-    #Remove pontuacao
-    texto_sem_pontuacao = re.sub('[^A-Za-z]', ' ' , texto_sem_digitos)
-
-    #Remove espaços extras
-    texto_sem_espacos_extras = re.sub(' +', ' ', texto_sem_pontuacao)
-
-    #Pega apenas a resposta final (nem sempre o padrao eh bonitinho)
-    firstRegex = r'(' + combinacoes + ') (.+?) (favor avalie resposta|$)'
-    secondRegex = r'(' + combinacoes + ') (.+)'
-    m = re.search(firstRegex, texto_sem_espacos_extras)
-    if m is not None:
-        while m is not None:
-            texto_so_resposta_final = m.group(2)
-            m = re.search(secondRegex, m.group(2))
+    if(not isEsic):
+        #retira todo o lixo antes de começar a resposta (not e-sic)
+        texto_sem_cabecalho = texto_lower
+        while True:
+            m = re.search(r'(data/hora: \d{2}/\d{2}/\d{4} \d{2}:\d{2}:\d{2})(.*)', texto_sem_cabecalho)
+            if m==None: break
+            texto_sem_cabecalho = m.group(2)
     else:
-        return 'pergunta ou resposta fora de padrao ou nao finalizada'
+        count = 0
+        texto_sem_cabecalho = texto_lower
+        while True:
+            #retira todo o lixo antes de começar a resposta (e-sic)
+            m = re.search(r'(acesso\s+concedido)(.*)',texto_sem_cabecalho)
+            if (m==None) and (count==0): return 'não há resposta para essa pergunta'
+            if m==None: break
+            texto_sem_cabecalho = m.group(2)
+            count = count+1    
 
-    #Retira stopwords que possam ter reaparecido e numeros romanos
-    texto_so_resposta_final = texto_so_resposta_final.split()
-    texto_limpo = [roman2num(palavra, stop_words) for palavra in texto_so_resposta_final]
-
-    texto_limpo = ' '.join(texto_limpo)
-
-    #Remove dígitos
-    texto_limpo = re.sub(r'\d','', texto_limpo)
-
-    #Remove espaços extras
-    texto_limpo = re.sub(' +', ' ', texto_limpo)
-
-    return texto_limpo
+    return texto_sem_cabecalho
 
 
 
